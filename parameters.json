@@ -13,6 +13,9 @@
         },
         "publicDomainNamePrefix": {
             "value": "remotedev"
+        },
+        "publicSshKey": {
+            "value": "dont think so"
         }
     }
 }

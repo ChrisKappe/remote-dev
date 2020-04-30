@@ -29,8 +29,15 @@
         "autoShutdownNotificationEmail": {
             "type": "string"
         },
-        "publicIPdnsPrefix": {
+        "publicDomainNamePrefix": {
             "type": "string"
+        },
+        "publicSshKey": {
+            "type": "string"
+        },
+        "branch": {
+            "type": "string",
+            "defaultValue": "master"
         }
     },
     "variables": {
@@ -140,7 +147,7 @@
             "properties": {
                 "publicIpAllocationMethod": "[variables('publicIpAddressType')]",
                 "dnsSettings": {
-                    "domainNameLabel": "[parameters('publicIPdnsPrefix')]"
+                    "domainNameLabel": "[parameters('publicDomainNamePrefix')]"
                 }
             },
             "sku": {
@@ -188,6 +195,29 @@
                         "enableAutomaticUpdates": true,
                         "provisionVmAgent": true
                     }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2015-06-15",
+            "name": "[concat(parameters('virtualMachineName'),'/script1')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+            ],
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.9",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[concat('https://raw.githubusercontent.com/cosmoconsult/remotedev/', parameters('branch'), '/InitVM.ps1')]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File InitVM.ps1 -sshKey ', reference(parameters('publicSshKey')))]"
                 }
             }
         },
