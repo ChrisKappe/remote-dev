@@ -29,9 +29,6 @@
         "autoShutdownNotificationEmail": {
             "type": "string"
         },
-        "publicDomainNamePrefix": {
-            "type": "string"
-        },
         "publicSshKey": {
             "type": "string"
         },
@@ -147,7 +144,7 @@
             "properties": {
                 "publicIpAllocationMethod": "[variables('publicIpAddressType')]",
                 "dnsSettings": {
-                    "domainNameLabel": "[parameters('publicDomainNamePrefix')]"
+                    "domainNameLabel": "[parameters('virtualMachineName')]"
                 }
             },
             "sku": {

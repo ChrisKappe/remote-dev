@@ -11,9 +11,6 @@
         "autoShutdownNotificationEmail": {
             "value": "tobias.fenster@arssolvendi.onmicrosoft.com"
         },
-        "publicDomainNamePrefix": {
-            "value": "remotedev"
-        },
         "publicSshKey": {
             "value": "dont think so"
         }
