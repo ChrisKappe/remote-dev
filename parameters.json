@@ -2,100 +2,17 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "location": {
-            "value": "westeurope"
-        },
-        "networkInterfaceName": {
-            "value": "csharpdev837"
-        },
-        "enableAcceleratedNetworking": {
-            "value": true
-        },
-        "networkSecurityGroupName": {
-            "value": "csharpdev-nsg"
-        },
-        "networkSecurityGroupRules": {
-            "value": [
-                {
-                    "name": "SSH",
-                    "properties": {
-                        "priority": 300,
-                        "protocol": "TCP",
-                        "access": "Allow",
-                        "direction": "Inbound",
-                        "sourceAddressPrefix": "*",
-                        "sourcePortRange": "*",
-                        "destinationAddressPrefix": "*",
-                        "destinationPortRange": "22"
-                    }
-                }
-            ]
-        },
-        "subnetName": {
-            "value": "default"
-        },
-        "virtualNetworkName": {
-            "value": "csharpdev-vnet"
-        },
-        "addressPrefixes": {
-            "value": [
-                "10.0.2.0/24"
-            ]
-        },
-        "subnets": {
-            "value": [
-                {
-                    "name": "default",
-                    "properties": {
-                        "addressPrefix": "10.0.2.0/24"
-                    }
-                }
-            ]
-        },
-        "publicIpAddressName": {
-            "value": "csharpdev-ip"
-        },
-        "publicIpAddressType": {
-            "value": "Dynamic"
-        },
-        "publicIpAddressSku": {
-            "value": "Basic"
-        },
         "virtualMachineName": {
             "value": "csharpdev"
-        },
-        "virtualMachineRG": {
-            "value": "csharpdev"
-        },
-        "osDiskType": {
-            "value": "Premium_LRS"
         },
         "virtualMachineSize": {
             "value": "Standard_D4s_v3"
         },
-        "adminUsername": {
-            "value": "VM-Administrator"
-        },
-        "adminPassword": {
-            "value": null
-        },
-        "autoShutdownStatus": {
-            "value": "Enabled"
-        },
-        "autoShutdownTime": {
-            "value": "03:00"
-        },
-        "autoShutdownTimeZone": {
-            "value": "W. Europe Standard Time"
-        },
-        "autoShutdownNotificationStatus": {
-            "value": "Enabled"
-        },
-        "autoShutdownNotificationLocale": {
-            "value": "en"
-        },
         "autoShutdownNotificationEmail": {
             "value": "tobias.fenster@arssolvendi.onmicrosoft.com"
+        },
+        "publicIPdnsPrefix": {
+            "value": "remotedev"
         }
     }
 }

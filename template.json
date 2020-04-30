@@ -2,94 +2,93 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "location": {
-            "type": "string"
-        },
-        "networkInterfaceName": {
-            "type": "string"
-        },
-        "enableAcceleratedNetworking": {
-            "type": "bool"
-        },
-        "networkSecurityGroupName": {
-            "type": "string"
-        },
-        "networkSecurityGroupRules": {
-            "type": "array"
-        },
-        "subnetName": {
-            "type": "string"
-        },
-        "virtualNetworkName": {
-            "type": "string"
-        },
-        "addressPrefixes": {
-            "type": "array"
-        },
-        "subnets": {
-            "type": "array"
-        },
-        "publicIpAddressName": {
-            "type": "string"
-        },
-        "publicIpAddressType": {
-            "type": "string"
-        },
-        "publicIpAddressSku": {
-            "type": "string"
-        },
         "virtualMachineName": {
             "type": "string"
         },
-        "virtualMachineRG": {
-            "type": "string"
-        },
-        "osDiskType": {
-            "type": "string"
-        },
         "virtualMachineSize": {
-            "type": "string"
+            "type": "string",
+            "allowedValues": [
+                "Standard_D2s_v3",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3"
+            ],
+            "defaultValue": "Standard_D4s_v3"
         },
         "adminUsername": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "VM-Administrator"
         },
         "adminPassword": {
-            "type": "secureString"
-        },
-        "autoShutdownStatus": {
-            "type": "string"
+            "type": "secureString",
+            "defaultValue": "[uniqueString(resourceGroup().id)]"
         },
         "autoShutdownTime": {
-            "type": "string"
-        },
-        "autoShutdownTimeZone": {
-            "type": "string"
-        },
-        "autoShutdownNotificationStatus": {
-            "type": "string"
-        },
-        "autoShutdownNotificationLocale": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "03:00"
         },
         "autoShutdownNotificationEmail": {
+            "type": "string"
+        },
+        "publicIPdnsPrefix": {
             "type": "string"
         }
     },
     "variables": {
-        "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
-        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+        "addressPrefixes": [
+            "10.0.2.0/24"
+        ],
+        "autoShutdownNotificationLocale": "en",
+        "autoShutdownNotificationStatus": "Enabled",
+        "autoShutdownStatus": "Enabled",
+        "autoShutdownTimeZone": "W. Europe Standard Time",
+        "enableAcceleratedNetworking": true,
+        "location": "[resourceGroup().location]",
+        "networkInterfaceName": "[toLower( concat( parameters('virtualMachineName'), uniqueString(resourceGroup().id) ) )]",
+        "networkSecurityGroupName": "[concat( parameters('virtualMachineName'), '-nsg')]",
+        "networkSecurityGroupRules": [
+            {
+                "name": "SSH",
+                "properties": {
+                    "priority": 300,
+                    "protocol": "TCP",
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "22"
+                }
+            }
+        ],
+        "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+        "osDiskType": "Premium_LRS",
+        "publicIpAddressName": "[concat( parameters('virtualMachineName'), '-ip')]",
+        "publicIpAddressSku": "Basic",
+        "publicIpAddressType": "Dynamic",
+        "subnetName": "default",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+        "subnets": [
+            {
+                "name": "default",
+                "properties": {
+                    "addressPrefix": "10.0.2.0/24"
+                }
+            }
+        ],
+        "virtualNetworkName": "[concat( parameters('virtualMachineName'), '-vnet')]",
+        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+
     },
     "resources": [
         {
-            "name": "[parameters('networkInterfaceName')]",
+            "name": "[variables('networkInterfaceName')]",
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2019-07-01",
-            "location": "[parameters('location')]",
+            "location": "[variables('location')]",
             "dependsOn": [
-                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
-                "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
-                "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]"
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -101,57 +100,60 @@
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIpAddress": {
-                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
+                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
                             }
                         }
                     }
                 ],
-                "enableAcceleratedNetworking": "[parameters('enableAcceleratedNetworking')]",
+                "enableAcceleratedNetworking": "[variables('enableAcceleratedNetworking')]",
                 "networkSecurityGroup": {
                     "id": "[variables('nsgId')]"
                 }
             }
         },
         {
-            "name": "[parameters('networkSecurityGroupName')]",
+            "name": "[variables('networkSecurityGroupName')]",
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2019-02-01",
-            "location": "[parameters('location')]",
+            "location": "[variables('location')]",
             "properties": {
-                "securityRules": "[parameters('networkSecurityGroupRules')]"
+                "securityRules": "[variables('networkSecurityGroupRules')]"
             }
         },
         {
-            "name": "[parameters('virtualNetworkName')]",
+            "name": "[variables('virtualNetworkName')]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2019-09-01",
-            "location": "[parameters('location')]",
+            "location": "[variables('location')]",
             "properties": {
                 "addressSpace": {
-                    "addressPrefixes": "[parameters('addressPrefixes')]"
+                    "addressPrefixes": "[variables('addressPrefixes')]"
                 },
-                "subnets": "[parameters('subnets')]"
+                "subnets": "[variables('subnets')]"
             }
         },
         {
-            "name": "[parameters('publicIpAddressName')]",
+            "name": "[variables('publicIpAddressName')]",
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2019-02-01",
-            "location": "[parameters('location')]",
+            "location": "[variables('location')]",
             "properties": {
-                "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
+                "publicIpAllocationMethod": "[variables('publicIpAddressType')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('publicIPdnsPrefix')]"
+                }
             },
             "sku": {
-                "name": "[parameters('publicIpAddressSku')]"
+                "name": "[variables('publicIpAddressSku')]"
             }
         },
         {
             "name": "[parameters('virtualMachineName')]",
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-07-01",
-            "location": "[parameters('location')]",
+            "location": "[variables('location')]",
             "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
             ],
             "properties": {
                 "hardwareProfile": {
@@ -161,7 +163,7 @@
                     "osDisk": {
                         "createOption": "fromImage",
                         "managedDisk": {
-                            "storageAccountType": "[parameters('osDiskType')]"
+                            "storageAccountType": "[variables('osDiskType')]"
                         }
                     },
                     "imageReference": {
@@ -174,7 +176,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
                         }
                     ]
                 },
@@ -192,22 +194,22 @@
         {
             "name": "[concat('shutdown-computevm-', parameters('virtualMachineName'))]",
             "type": "Microsoft.DevTestLab/schedules",
-            "apiVersion": "2017-04-26-preview",
-            "location": "[parameters('location')]",
+            "apiVersion": "2018-09-15",
+            "location": "[variables('location')]",
             "dependsOn": [
                 "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
             ],
             "properties": {
-                "status": "[parameters('autoShutdownStatus')]",
+                "status": "[variables('autoShutdownStatus')]",
                 "taskType": "ComputeVmShutdownTask",
                 "dailyRecurrence": {
                     "time": "[parameters('autoShutdownTime')]"
                 },
-                "timeZoneId": "[parameters('autoShutdownTimeZone')]",
+                "timeZoneId": "[variables('autoShutdownTimeZone')]",
                 "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]",
                 "notificationSettings": {
-                    "status": "[parameters('autoShutdownNotificationStatus')]",
-                    "notificationLocale": "[parameters('autoShutdownNotificationLocale')]",
+                    "status": "[variables('autoShutdownNotificationStatus')]",
+                    "notificationLocale": "[variables('autoShutdownNotificationLocale')]",
                     "timeInMinutes": "30",
                     "emailRecipient": "[parameters('autoShutdownNotificationEmail')]"
                 }
