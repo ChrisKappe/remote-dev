@@ -2,17 +2,15 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "virtualMachineName": {
+        "publicSshKey": {
             "type": "string"
         },
-        "virtualMachineSize": {
+        "autoShutdownNotificationEmail": {
+            "type": "string"
+        },
+        "autoShutdownTime": {
             "type": "string",
-            "allowedValues": [
-                "Standard_D2s_v3",
-                "Standard_D4s_v3",
-                "Standard_D8s_v3"
-            ],
-            "defaultValue": "Standard_D4s_v3"
+            "defaultValue": "03:00"
         },
         "adminUsername": {
             "type": "string",
@@ -22,15 +20,14 @@
             "type": "secureString",
             "defaultValue": "[concat('aA1.', uniqueString(resourceGroup().id))]"
         },
-        "autoShutdownTime": {
+        "virtualMachineSize": {
             "type": "string",
-            "defaultValue": "03:00"
-        },
-        "autoShutdownNotificationEmail": {
-            "type": "string"
-        },
-        "publicSshKey": {
-            "type": "string"
+            "allowedValues": [
+                "Standard_D2s_v3",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3"
+            ],
+            "defaultValue": "Standard_D4s_v3"
         },
         "branch": {
             "type": "string",
@@ -47,8 +44,8 @@
         "autoShutdownTimeZone": "W. Europe Standard Time",
         "enableAcceleratedNetworking": true,
         "location": "[resourceGroup().location]",
-        "networkInterfaceName": "[toLower( concat( parameters('virtualMachineName'), uniqueString(resourceGroup().id) ) )]",
-        "networkSecurityGroupName": "[concat( parameters('virtualMachineName'), '-nsg')]",
+        "networkInterfaceName": "[toLower( concat( variables('virtualMachineName'), uniqueString(resourceGroup().id) ) )]",
+        "networkSecurityGroupName": "[concat( variables('virtualMachineName'), '-nsg')]",
         "networkSecurityGroupRules": [
             {
                 "name": "SSH",
@@ -66,7 +63,7 @@
         ],
         "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
         "osDiskType": "Premium_LRS",
-        "publicIpAddressName": "[concat( parameters('virtualMachineName'), '-ip')]",
+        "publicIpAddressName": "[concat( variables('virtualMachineName'), '-ip')]",
         "publicIpAddressSku": "Basic",
         "publicIpAddressType": "Dynamic",
         "subnetName": "default",
@@ -79,8 +76,9 @@
                 }
             }
         ],
-        "virtualNetworkName": "[concat( parameters('virtualMachineName'), '-vnet')]",
-        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+        "virtualNetworkName": "[concat( variables('virtualMachineName'), '-vnet')]",
+        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+        "virtualMachineName": "[resourceGroup().name]"
 
     },
     "resources": [
@@ -144,7 +142,7 @@
             "properties": {
                 "publicIpAllocationMethod": "[variables('publicIpAddressType')]",
                 "dnsSettings": {
-                    "domainNameLabel": "[parameters('virtualMachineName')]"
+                    "domainNameLabel": "[variables('virtualMachineName')]"
                 }
             },
             "sku": {
@@ -152,7 +150,7 @@
             }
         },
         {
-            "name": "[parameters('virtualMachineName')]",
+            "name": "[variables('virtualMachineName')]",
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-07-01",
             "location": "[variables('location')]",
@@ -185,7 +183,7 @@
                     ]
                 },
                 "osProfile": {
-                    "computerName": "[parameters('virtualMachineName')]",
+                    "computerName": "[variables('virtualMachineName')]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "windowsConfiguration": {
@@ -198,9 +196,9 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2015-06-15",
-            "name": "[concat(parameters('virtualMachineName'),'/script1')]",
+            "name": "[concat(variables('virtualMachineName'),'/script1')]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachineName'))]"
             ],
             "location": "[resourceGroup().location]",
             "properties": {
@@ -219,12 +217,12 @@
             }
         },
         {
-            "name": "[concat('shutdown-computevm-', parameters('virtualMachineName'))]",
+            "name": "[concat('shutdown-computevm-', variables('virtualMachineName'))]",
             "type": "Microsoft.DevTestLab/schedules",
             "apiVersion": "2018-09-15",
             "location": "[variables('location')]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachineName'))]"
             ],
             "properties": {
                 "status": "[variables('autoShutdownStatus')]",
@@ -233,7 +231,7 @@
                     "time": "[parameters('autoShutdownTime')]"
                 },
                 "timeZoneId": "[variables('autoShutdownTimeZone')]",
-                "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]",
+                "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachineName'))]",
                 "notificationSettings": {
                     "status": "[variables('autoShutdownNotificationStatus')]",
                     "notificationLocale": "[variables('autoShutdownNotificationLocale')]",
