@@ -16,6 +16,6 @@ choco install vim
 choco install openssh -params '"/SSHServerFeature"'
 
 # configure SSH
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/cosmoconsult/remotedev/$branch/sshd_config" -UseBasicParsing -OutFile "c:\ProgramData\ssh\sshd_config"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/cosmoconsult/remote-dev/$branch/sshd_config" -UseBasicParsing -OutFile "c:\ProgramData\ssh\sshd_config"
 restart-service sshd
 $sshKey | Out-File 'c:\programdata\ssh\administrators_authorized_keys'
