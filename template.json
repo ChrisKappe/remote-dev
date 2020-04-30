@@ -20,7 +20,7 @@
         },
         "adminPassword": {
             "type": "secureString",
-            "defaultValue": "[uniqueString(resourceGroup().id)]"
+            "defaultValue": "[concat('aA1.', uniqueString(resourceGroup().id))]"
         },
         "autoShutdownTime": {
             "type": "string",
@@ -210,11 +210,11 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "[concat('https://raw.githubusercontent.com/cosmoconsult/remotedev/', parameters('branch'), '/InitVM.ps1')]"
+                        "[concat('https://raw.githubusercontent.com/cosmoconsult/remote-dev/', parameters('branch'), '/InitVM.ps1')]"
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File InitVM.ps1 -sshKey ', parameters('publicSshKey'))]"
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File InitVM.ps1 -branch \"', parameters('branch') , '\" -sshKey \"', parameters('publicSshKey'), '\"')]"
                 }
             }
         },
@@ -244,9 +244,5 @@
         }
     ],
     "outputs": {
-        "adminUsername": {
-            "type": "string",
-            "value": "[parameters('adminUsername')]"
-        }
     }
 }

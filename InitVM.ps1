@@ -1,7 +1,11 @@
 param (
     [Parameter()]
     [string]
-    $sshKey
+    $sshKey,
+    
+    [Parameter()]
+    [string]
+    $branch
 )
 
 # install chocolatey
