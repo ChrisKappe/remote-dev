@@ -214,7 +214,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File InitVM.ps1 -sshKey ', reference(parameters('publicSshKey')))]"
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File InitVM.ps1 -sshKey ', parameters('publicSshKey'))]"
                 }
             }
         },
