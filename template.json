@@ -31,7 +31,7 @@
         },
         "branch": {
             "type": "string",
-            "defaultValue": "master"
+            "defaultValue": "enable_pwd"
         }
     },
     "variables": {
