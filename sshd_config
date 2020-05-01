@@ -1,6 +1,6 @@
 Port 22
 PubkeyAuthentication yes
-PasswordAuthentication no
+#PasswordAuthentication no
 ClientAliveInterval 60
 Subsystem	sftp	sftp-server.exe
 Match Group administrators
