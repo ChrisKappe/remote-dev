@@ -1,5 +1,5 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "publicSshKey": {
@@ -42,7 +42,7 @@
         "autoShutdownNotificationStatus": "Enabled",
         "autoShutdownStatus": "Enabled",
         "autoShutdownTimeZone": "W. Europe Standard Time",
-        "enableAcceleratedNetworking": true,
+        "enableAcceleratedNetworking": "[if(equals(parameters('virtualMachineSize'), 'Standard_D2s_v3'), 'false', 'true')]",
         "location": "[resourceGroup().location]",
         "networkInterfaceName": "[toLower( concat( variables('virtualMachineName'), uniqueString(resourceGroup().id) ) )]",
         "networkSecurityGroupName": "[concat( variables('virtualMachineName'), '-nsg')]",
@@ -235,7 +235,7 @@
                 "notificationSettings": {
                     "status": "[variables('autoShutdownNotificationStatus')]",
                     "notificationLocale": "[variables('autoShutdownNotificationLocale')]",
-                    "timeInMinutes": "30",
+                    "timeInMinutes": 30,
                     "emailRecipient": "[parameters('autoShutdownNotificationEmail')]"
                 }
             }
